@@ -1,6 +1,6 @@
 package com.resumegenerator.output.Controllers;
 
-import com.resumegenerator.output.Models.ResumeModel;
+import com.resumegenerator.output.Models.Resume;
 import com.resumegenerator.output.Requests.CreateResumeRequest;
 import com.resumegenerator.output.Services.ResumeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,20 +21,20 @@ public class ResumeController {
     }
 
     @PostMapping("/resumes")
-    public ResponseEntity<ResumeModel> createResume(@RequestBody CreateResumeRequest request) {
-        ResumeModel resume = resumeService.createResume(request);
+    public ResponseEntity<Resume> createResume(@RequestBody CreateResumeRequest request) {
+        Resume resume = resumeService.createResume(request);
         return new ResponseEntity<>(resume, HttpStatus.CREATED);
     }
 
     @GetMapping("/resumes")
-    public ResponseEntity<List<ResumeModel>> getAllResumes() {
-        List<ResumeModel> resumes = resumeService.getAllResumes();
+    public ResponseEntity<List<Resume>> getAllResumes() {
+        List<Resume> resumes = resumeService.getAllResumes();
         return ResponseEntity.ok(resumeService.getAllResumes());
     }
 
     @PutMapping("/resumes/{resumeId}")
-    public ResponseEntity<ResumeModel> updateResumebyID(@PathVariable("resumeId") Long resumeId, @RequestBody CreateResumeRequest request) {
-        ResumeModel updateResume = resumeService.updateResumebyID(resumeId, request);
+    public ResponseEntity<Resume> updateResumebyID(@PathVariable("resumeId") Long resumeId, @RequestBody CreateResumeRequest request) {
+        Resume updateResume = resumeService.updateResumebyID(resumeId, request);
         return ResponseEntity.ok(updateResume);
     }
 

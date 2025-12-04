@@ -1,5 +1,5 @@
 package com.resumegenerator.output.Services;
-import com.resumegenerator.output.Models.ResumeModel;
+import com.resumegenerator.output.Models.Resume;
 import com.resumegenerator.output.Repositories.ResumeRepository;
 import com.resumegenerator.output.Requests.CreateResumeRequest;
 import jakarta.transaction.Transactional;
@@ -16,8 +16,8 @@ public class ResumeService {
         this.resumeRepository = resumeRepository;
     }
 
-    public ResumeModel createResume(CreateResumeRequest request) {
-        ResumeModel resume = ResumeModel.builder()
+    public Resume createResume(CreateResumeRequest request) {
+        Resume resume = Resume.builder()
                 .resumeId(request.getResumeId())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -28,13 +28,13 @@ public class ResumeService {
         return resume;
     }
 
-    public List<ResumeModel> getAllResumes() {
+    public List<Resume> getAllResumes() {
         return resumeRepository.findAll();
     }
 
     @Transactional
-    public ResumeModel updateResumebyID(Long resumeId, CreateResumeRequest request) {
-        ResumeModel existingResume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("Resume not found: " + resumeId));
+    public Resume updateResumebyID(Long resumeId, CreateResumeRequest request) {
+        Resume existingResume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("Resume not found: " + resumeId));
 
         existingResume.setFirstName(request.getFirstName());
         existingResume.setLastName(request.getLastName());

@@ -1,4 +1,11 @@
 package com.resumegenerator.output.Models;
+import com.resumegenerator.output.Models.address;
+import com.resumegenerator.output.Models.Name;
+import com.resumegenerator.output.Models.email;
+import com.resumegenerator.output.Models.contactNumber;
+import com.resumegenerator.output.Models.workExperience;
+import com.resumegenerator.output.Models.education;
+import com.resumegenerator.output.Models.skills;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -9,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResumeModel {
+public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name ="resumeId", nullable = false, updatable = false)
@@ -27,11 +34,11 @@ public class ResumeModel {
     @Column(name = "phone", nullable = false, updatable = true)
     private String phone;
 
-
-
     private LocalDateTime createdAt;
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    //One to many java connection: (MUST)
 }
