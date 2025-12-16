@@ -1,5 +1,6 @@
 package com.resumegenerator.output.Requests;
 
+import com.resumegenerator.output.Models.personalInformation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,9 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class CreateResumeRequest {
-    private Long resumeId;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
+    private personalInformation personalInformation;
 }

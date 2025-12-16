@@ -19,8 +19,11 @@ import java.time.LocalDateTime;
 public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="resumeId", nullable = false, updatable = false)
-    private Long resumeId;
+    private Long resume_id;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "personalInformation_id", referencedColumnName = "id")
+    private personalInformation personalInformation;
 
     @Column(name = "firstName", nullable = false, updatable = true)
     private String firstName;
@@ -40,5 +43,5 @@ public class Resume {
         this.createdAt = LocalDateTime.now();
     }
 
-    //One to many java connection: (MUST)
+    //One-to-many model connection: (MUST) @OneToMany
 }

@@ -1,5 +1,6 @@
 package com.resumegenerator.output.Services;
 import com.resumegenerator.output.Models.Resume;
+import com.resumegenerator.output.Models.personalInformation;
 import com.resumegenerator.output.Repositories.ResumeRepository;
 import com.resumegenerator.output.Requests.CreateResumeRequest;
 import jakarta.transaction.Transactional;
@@ -17,15 +18,20 @@ public class ResumeService {
     }
 
     public Resume createResume(CreateResumeRequest request) {
-        Resume resume = Resume.builder()
-                .resumeId(request.getResumeId())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .build();
-        resumeRepository.save(resume);
-        return resume;
+        personalInformation pi =  new personalInformation();
+        pi.setFirstName(request.getPersonalInformation().getFirstName());
+        pi.setMiddleName(request.getPersonalInformation().getMiddleName());
+        pi.setLastName(request.getPersonalInformation().getLastName());
+        pi.setEmail(request.getPersonalInformation().getEmail());
+        pi.setAddress(request.getPersonalInformation().getAddress());
+        pi.setPhone(request.getPersonalInformation().getPhone());
+
+        Resume resume = new Resume();
+        resume.setPersonalInformation(pi);
+
+        pi.setResume(resume);
+
+        return resumeRepository.save(resume);
     }
 
     public List<Resume> getAllResumes() {
@@ -36,12 +42,15 @@ public class ResumeService {
     public Resume updateResumebyID(Long resumeId, CreateResumeRequest request) {
         Resume existingResume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("Resume not found: " + resumeId));
 
-        existingResume.setFirstName(request.getFirstName());
-        existingResume.setLastName(request.getLastName());
-        existingResume.setPhone(request.getPhone());
-        existingResume.setEmail(request.getEmail());
+        personalInformation pi =  existingResume.getPersonalInformation();
+        pi.setFirstName(request.getPersonalInformation().getFirstName());
+        pi.setMiddleName(request.getPersonalInformation().getMiddleName());
+        pi.setLastName(request.getPersonalInformation().getLastName());
+        pi.setEmail(request.getPersonalInformation().getEmail());
+        pi.setAddress(request.getPersonalInformation().getAddress());
+        pi.setPhone(request.getPersonalInformation().getPhone());
 
-        return resumeRepository.save(existingResume);
+        return existingResume;
      }
      @Transactional
     public void deleteResume(Long resumeId) {
