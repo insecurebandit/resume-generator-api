@@ -1,8 +1,12 @@
 package com.resumegenerator.output.Services;
 import com.resumegenerator.output.Models.PersonalInformation;
 import com.resumegenerator.output.Models.Resume;
+<<<<<<< HEAD
 import com.resumegenerator.output.Models.Skills;
 import com.resumegenerator.output.Models.Education;
+=======
+import com.resumegenerator.output.Models.personalInformation;
+>>>>>>> 187d47f3e63fe144367f8859f9daf553683ab8ab
 import com.resumegenerator.output.Repositories.ResumeRepository;
 import com.resumegenerator.output.Requests.CreateResumeRequest;
 import jakarta.transaction.Transactional;
@@ -21,6 +25,7 @@ public class ResumeService {
 
     @Transactional
     public Resume createResume(CreateResumeRequest request) {
+<<<<<<< HEAD
         Resume resume = new Resume();
 
         //Personal Information
@@ -48,6 +53,21 @@ public class ResumeService {
         resume.setEducation(education);
 
         //save and return it
+=======
+        personalInformation pi =  new personalInformation();
+        pi.setFirstName(request.getPersonalInformation().getFirstName());
+        pi.setMiddleName(request.getPersonalInformation().getMiddleName());
+        pi.setLastName(request.getPersonalInformation().getLastName());
+        pi.setEmail(request.getPersonalInformation().getEmail());
+        pi.setAddress(request.getPersonalInformation().getAddress());
+        pi.setPhone(request.getPersonalInformation().getPhone());
+
+        Resume resume = new Resume();
+        resume.setPersonalInformation(pi);
+
+        pi.setResume(resume);
+
+>>>>>>> 187d47f3e63fe144367f8859f9daf553683ab8ab
         return resumeRepository.save(resume);
     }
 
@@ -59,6 +79,7 @@ public class ResumeService {
     public Resume updateResumebyID(Long resumeId, CreateResumeRequest request) {
         Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("Resume not found: " + resumeId));
 
+<<<<<<< HEAD
         //Import models
         PersonalInformation pi = resume.getPersonalInformation();
         Skills skills = resume.getSkills();
@@ -95,6 +116,17 @@ public class ResumeService {
         education.setCompletionDate(request.getCompletionDate());
 
         return resume;
+=======
+        personalInformation pi =  existingResume.getPersonalInformation();
+        pi.setFirstName(request.getPersonalInformation().getFirstName());
+        pi.setMiddleName(request.getPersonalInformation().getMiddleName());
+        pi.setLastName(request.getPersonalInformation().getLastName());
+        pi.setEmail(request.getPersonalInformation().getEmail());
+        pi.setAddress(request.getPersonalInformation().getAddress());
+        pi.setPhone(request.getPersonalInformation().getPhone());
+
+        return existingResume;
+>>>>>>> 187d47f3e63fe144367f8859f9daf553683ab8ab
      }
      @Transactional
     public void deleteResume(Long resumeId) {
