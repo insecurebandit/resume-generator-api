@@ -163,7 +163,7 @@ public class ResumeService {
             PdfPTable table = new PdfPTable(2);  // 2 columns: Label | Value
             table.setWidthPercentage(100);
             table.addCell("Name");
-            table.addCell(pi.getFirstName() + " " + (pi.getMiddleName() != null ? pi.getMiddleName() + " " : "") + pi.getLastName());
+            table.addCell(pi.getFirstName() + " " + (pi.getMiddleName() != null ? pi.getMiddleName() + " " : "") + pi.getLastName() + " " + pi.getSuffix());
             table.addCell("Email");
             table.addCell(pi.getEmail() != null ? pi.getEmail() : "N/A");
             table.addCell("Phone");

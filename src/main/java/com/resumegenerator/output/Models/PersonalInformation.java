@@ -29,6 +29,7 @@ public class PersonalInformation {
 
     @Column(nullable = false)
     private String lastName;
+
     @Column(nullable = true, length = 10)
     private String suffix;
 

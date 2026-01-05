@@ -57,7 +57,6 @@ public class ResumeController {
     @PostMapping("/resumes/generate")
     public ResponseEntity<byte[]> generateResumePdf(@RequestBody ResumePdfDto dto) {
         try {
-            // Pass the full resume object to the service
             byte[] pdfBytes = resumeService.generateResumePdf(dto);
 
             HttpHeaders headers = new HttpHeaders();
