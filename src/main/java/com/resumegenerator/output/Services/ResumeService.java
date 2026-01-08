@@ -1,13 +1,5 @@
 package com.resumegenerator.output.Services;
 
-
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
-import com.lowagie.text.PageSize;
 import com.resumegenerator.output.DTOs.ResumePdfDto;
 import com.resumegenerator.output.Models.*;
 import com.resumegenerator.output.Repositories.ResumeRepository;
@@ -15,15 +7,25 @@ import com.resumegenerator.output.Requests.CreateResumeRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.draw.LineSeparator;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 @Service
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+
+    // PDF Fonts
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 24, Font.BOLD, new Color(44, 62, 80));
+    private static final Font SUBTITLE_FONT = new Font(Font.HELVETICA, 12, Font.NORMAL, Color.GRAY);
+    private static final Font SECTION_HEADER_FONT = new Font(Font.HELVETICA, 14, Font.BOLD, Color.WHITE);
+    private static final Font BODY_FONT = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.BLACK);
+    private static final Font BOLD_BODY_FONT = new Font(Font.HELVETICA, 11, Font.BOLD, Color.BLACK);
 
     public ResumeService(ResumeRepository resumeRepository) {
         this.resumeRepository = resumeRepository;
@@ -34,18 +36,6 @@ public class ResumeService {
     @Transactional
     public Resume createResume(CreateResumeRequest request) {
         Resume resume = new Resume();
-
-        // Personal Information
-        PersonalInformation pi = new PersonalInformation();
-        pi.setFirstName(request.getFirstName());
-        pi.setMiddleName(request.getMiddleName());
-        pi.setLastName(request.getLastName());
-        pi.setSuffix(request.getSuffix());
-        pi.setEmail(request.getEmail());
-        pi.setPhone(request.getPhone());
-        pi.setAddress(request.getAddress());
-        pi.setResume(resume);
-        resume.setPersonalInformation(pi);
 
         // Professional Summary
         ProfessionalSummary ps = new ProfessionalSummary();
@@ -95,6 +85,13 @@ public class ResumeService {
             pi.setResume(resume);
             resume.setPersonalInformation(pi);
         }
+        pi.setFirstName(request.getFirstName());
+        pi.setMiddleName(request.getMiddleName());
+        pi.setLastName(request.getLastName());
+        pi.setSuffix(request.getSuffix());
+        pi.setEmail(request.getEmail());
+        pi.setPhone(request.getPhone());
+        pi.setAddress(request.getAddress());
 
         if (ps == null) {
             ps = new ProfessionalSummary();
@@ -142,88 +139,177 @@ public class ResumeService {
     }
 
     // ---------------- PDF Generation ----------------
-    public byte[] generateResumePdf(ResumePdfDto resume) throws DocumentException, IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
-        PdfWriter.getInstance(document, outputStream);
-        document.open();
 
-        // Title
-        Paragraph title = new Paragraph("Resume", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24));
-        title.setAlignment(Paragraph.ALIGN_CENTER);
-        document.add(title);
-        document.add(new Paragraph("\n"));
+    public byte[] generateResumePdf(ResumePdfDto dto) {
+        System.out.println("DEBUG: Starting PDF Generation and save for DTO" + dto);
+        Resume resumeEntity = new Resume();
 
-        // Personal Information Section
-        if (resume.getPersonalInformation() != null) {
-            PersonalInformation pi = resume.getPersonalInformation();
-            document.add(new Paragraph("Personal Information", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(2);  // 2 columns: Label | Value
-            table.setWidthPercentage(100);
-            table.addCell("Name");
-            table.addCell(pi.getFirstName() + " " + (pi.getMiddleName() != null ? pi.getMiddleName() + " " : "") + pi.getLastName() + " " + pi.getSuffix());
-            table.addCell("Email");
-            table.addCell(pi.getEmail() != null ? pi.getEmail() : "N/A");
-            table.addCell("Phone");
-            table.addCell(pi.getPhone());
-            table.addCell("Address");
-            table.addCell(pi.getAddress());
-            document.add(table);
-            document.add(new Paragraph("\n"));
+        if (dto.getPersonalInformation() != null) {
+            PersonalInformation pi = new PersonalInformation();
+            pi.setFirstName(dto.getPersonalInformation().getFirstName());
+            pi.setMiddleName(dto.getPersonalInformation().getMiddleName());
+            pi.setLastName(dto.getPersonalInformation().getLastName());
+            pi.setSuffix(dto.getPersonalInformation().getSuffix());
+            pi.setEmail(dto.getPersonalInformation().getEmail());
+            pi.setPhone(dto.getPersonalInformation().getPhone());
+            pi.setAddress(dto.getPersonalInformation().getAddress());
+            pi.setResume(resumeEntity);
+            resumeEntity.setPersonalInformation(pi);
+        }
+        if (dto.getSkills() != null) {
+            Skills skills = new Skills();
+            skills.setSkills(dto.getSkills().getSkills());
+            skills.setResume(resumeEntity);
+            resumeEntity.setSkills(skills);
+        }
+        if (dto.getEducation() != null) {
+            Education edu = new Education();
+            edu.setInstitution(dto.getEducation().getInstitution());
+            edu.setCompletionDate(dto.getEducation().getCompletionDate());
+            edu.setResume(resumeEntity);
+            resumeEntity.setEducation(edu);
+        }
+        if (dto.getProfessionalSummary() != null) {
+            ProfessionalSummary prof = new ProfessionalSummary();
+            prof.setSummary(dto.getProfessionalSummary().getSummary());
+            prof.setResume(resumeEntity);
+            resumeEntity.setProfessionalSummary(prof);
+        }
+        if (dto.getExperience() != null) {
+            Experience exp = new Experience();
+            exp.setExperience(dto.getExperience().getExperience());
+            exp.setResume(resumeEntity);
+            resumeEntity.setExperience(exp);
         }
 
-        // Skills Section
-        if (resume.getSkills() != null) {
-            document.add(new Paragraph("Skills", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph("\n"));
-            PdfPTable skillsTable = new PdfPTable(1);  // Single column for list
-            skillsTable.setWidthPercentage(100);
-            skillsTable.addCell(resume.getSkills().getSkills());
-            document.add(skillsTable);
-            document.add(new Paragraph("\n"));
+        try {
+            System.out.println("DEBUG: Saving resume to database");
+            resumeRepository.save(resumeEntity);
+            System.out.println("DEBUG: Resume saved with ID: " + resumeEntity.getResumeId());
+        } catch (Exception e) {
+            System.err.println("DEBUG: Resume not saved with ID: " + resumeEntity.getResumeId());
+            e.printStackTrace();
+            throw new RuntimeException("Database save failed :(" , e);
         }
 
-        // Education Section
-        if (resume.getEducation() != null) {
-            document.add(new Paragraph("Education", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph("\n"));
-            PdfPTable eduTable = new PdfPTable(2);
-            eduTable.setWidthPercentage(100);
-            eduTable.addCell("Institution");
-            eduTable.addCell(resume.getEducation().getInstitution());
-            if (resume.getEducation().getCompletionDate() != null) {
-                eduTable.addCell("Completion Date");
-                eduTable.addCell(resume.getEducation().getCompletionDate());
+        System.out.println("DEBUG: Generating the damn PDF");
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4, 40, 40, 40, 40);
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            // --- Personal Info ---
+            if (dto.getPersonalInformation() != null) {
+                PersonalInformation pi = dto.getPersonalInformation();
+                document.add(new Paragraph("\n"));
+                addHeader(document, pi);
+                addEmptyLine(document);
             }
-            document.add(eduTable);
-            document.add(new Paragraph("\n"));
-        }
 
-        // Professional Summary Section
-        if (resume.getProfessionalSummary() != null) {
-            document.add(new Paragraph("Professional Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph("\n"));
-            PdfPTable summaryTable = new PdfPTable(1);
-            summaryTable.setWidthPercentage(100);
-            summaryTable.addCell(resume.getProfessionalSummary().getSummary());
-            document.add(summaryTable);
-            document.add(new Paragraph("\n"));
-        }
 
-        // Experience Section
-        if (resume.getExperience() != null) {
-            document.add(new Paragraph("Work Experience", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph("\n"));
-            PdfPTable experienceTable = new PdfPTable(1);
-            experienceTable.setWidthPercentage(100);
-            experienceTable.addCell(resume.getExperience().getExperience());
-            document.add(experienceTable);
-            document.add(new Paragraph("\n"));
-        }
+            // --- Professional Summary ---
+            if (dto.getProfessionalSummary() != null) {
+                addSectionTitle(document, "PROFESSIONAL SUMMARY");
+                document.add(new Paragraph(dto.getProfessionalSummary().getSummary(), BODY_FONT));
+                addEmptyLine(document);
+            }
 
-        document.close();
-        return outputStream.toByteArray();
+            // --- Experience ---
+            if (dto.getExperience() != null) {
+                addSectionTitle(document, "EXPERIENCE");
+                document.add(new Paragraph(dto.getExperience().getExperience(), BODY_FONT));
+                addEmptyLine(document);
+            }
+
+            // --- Education ---
+            if (dto.getEducation() != null) {
+                addSectionTitle(document, "EDUCATION");
+                PdfPTable table = new PdfPTable(2);
+                table.setWidthPercentage(100);
+                table.setWidths(new float[]{1, 3});
+                addEducationRow(table, "Institution", dto.getEducation().getInstitution());
+                addEducationRow(table, "Completion Date", dto.getEducation().getCompletionDate());
+                document.add(table);
+                addEmptyLine(document);
+            }
+
+            // --- Skills ---
+            if (dto.getSkills() != null) {
+                addSectionTitle(document, "SKILLS");
+                document.add(new Paragraph(dto.getSkills().getSkills(), BODY_FONT));
+                addEmptyLine(document);
+            }
+
+            document.close();
+            return out.toByteArray();
+        } catch (Exception e) {
+            return null;
+        }
     }
+
+    // ---------------- PDF Helpers ----------------
+
+    private void addHeader(Document document, PersonalInformation info) throws DocumentException {
+        if (info == null) return;
+
+        String fullName = info.getFirstName() + " " +
+                (info.getMiddleName() != null ? info.getMiddleName() + " " : "") +
+                info.getLastName() +
+                (info.getSuffix() != null ? " " + info.getSuffix() : "");
+
+        Paragraph name = new Paragraph(fullName.toUpperCase(), TITLE_FONT);
+        name.setAlignment(Element.ALIGN_CENTER);
+        document.add(name);
+
+        String contact = "";
+        if (info.getEmail() != null) contact += info.getEmail();
+        if (info.getPhone() != null) contact += " | " + info.getPhone();
+        if (info.getAddress() != null) contact += " | " + info.getAddress();
+
+        Paragraph contactParagraph = new Paragraph(contact, SUBTITLE_FONT);
+        contactParagraph.setAlignment(Element.ALIGN_CENTER);
+        contactParagraph.setSpacingAfter(10f);
+        document.add(contactParagraph);
+
+        LineSeparator ls = new LineSeparator();
+        ls.setLineColor(Color.LIGHT_GRAY);
+        document.add(new Chunk(ls));
+        addEmptyLine(document);
     }
+
+    private void addSectionTitle(Document document, String title) throws DocumentException {
+        PdfPTable table = new PdfPTable(1);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10f);
+
+        PdfPCell cell = new PdfPCell(new Phrase(title, SECTION_HEADER_FONT));
+        cell.setBackgroundColor(new Color(44, 62, 80));
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
+
+        document.add(table);
+        document.add(new Paragraph(" ", new Font(Font.HELVETICA, 4)));
+    }
+
+    private void addEducationRow(PdfPTable table, String label, String value) {
+        if (value == null) return;
+
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, BOLD_BODY_FONT));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPaddingBottom(5);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, BODY_FONT));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPaddingBottom(5);
+
+        table.addCell(labelCell);
+        table.addCell(valueCell);
+    }
+
+    private void addEmptyLine(Document document) throws DocumentException {
+        for (int i = 0; i < 1; i++) {
+            document.add(new Paragraph(" "));
+        }
+    }
+}
